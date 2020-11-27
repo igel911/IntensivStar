@@ -16,6 +16,7 @@ import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.MockRepository
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
+import ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment
 import timber.log.Timber
 
 class FeedFragment : Fragment() {
@@ -91,7 +92,8 @@ class FeedFragment : Fragment() {
         }
 
         val bundle = Bundle()
-        bundle.putString("title", movie.title)
+        bundle.putString(MovieDetailsFragment.TITLE, movie.title)
+        bundle.putFloat(MovieDetailsFragment.RATING, movie.rating)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 
