@@ -14,7 +14,7 @@
         <ImageView
             android:id="@+id/image_movie"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="@dimen/movie_image_toolbar_height"
             android:contentDescription="@string/movie_image_description"
             android:scaleType="centerCrop"
             android:src="@drawable/aqua_man" />

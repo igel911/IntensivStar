@@ -8,8 +8,8 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/image_preview"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/actor_item_height"
+        android:layout_height="@dimen/actor_item_height"
         android:layout_gravity="center_horizontal"
         android:scaleType="centerCrop"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.CornerSize50Percent"

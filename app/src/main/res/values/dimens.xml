@@ -20,4 +20,10 @@
     <dimen name="tv_show_card_height">150dp</dimen>
     <dimen name="tv_show_card_text_size">18sp</dimen>
 
+    <!-- Actor Item -->
+    <dimen name="actor_item_height">50dp</dimen>
+
+    <!-- Movie details -->
+    <dimen name="movie_image_toolbar_height">250dp</dimen>
+
 </resources>
