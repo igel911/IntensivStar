@@ -2,6 +2,7 @@ package ru.mikhailskiy.intensiv.ui.feed
 
 import android.os.Bundle
 import android.view.*
+import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navOptions
@@ -11,10 +12,14 @@ import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.MockRepository
 import ru.mikhailskiy.intensiv.data.Movie
+import ru.mikhailskiy.intensiv.data.MoviesResponse
+import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment
 import timber.log.Timber
@@ -48,37 +53,47 @@ class FeedFragment : Fragment() {
             }
         }
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        val moviesList = listOf(
-            MainCardContainer(
-                R.string.recommended,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(
-                            movie
-                        )
-                    }
-                }.toList()
-            )
-        )
+        val getTopRatedMovies = MovieApiClient.apiClient.getTopRatedMovies()
+        getTopRatedMovies.enqueue(getMovieCallback(R.string.recommended))
 
-        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+        val getUpcomingMovies = MovieApiClient.apiClient.getUpComingMovies()
+        getUpcomingMovies.enqueue(getMovieCallback(R.string.upcoming))
 
-        // Используя Мок-репозиторий получаем фэйковый список фильмов
-        // Чтобы отобразить второй ряд фильмов
-        val newMoviesList = listOf(
-            MainCardContainer(
-                R.string.upcoming,
-                MockRepository.getMovies().map {
-                    MovieItem(it) { movie ->
-                        openMovieDetails(movie)
-                    }
-                }.toList()
-            )
-        )
+        val getPopularMovies = MovieApiClient.apiClient.getPopularMovies()
+        getPopularMovies.enqueue(getMovieCallback(R.string.popular))
 
-        adapter.apply { addAll(newMoviesList) }
+    }
 
+    private fun getMovieCallback(@StringRes stringId: Int) = object : Callback<MoviesResponse> {
+
+        override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
+            // Логируем ошибку
+            Timber.e(error.toString())
+        }
+
+        override fun onResponse(
+            call: Call<MoviesResponse>,
+            response: Response<MoviesResponse>
+        ) {
+
+            val movies = response.body()?.results
+            // Передаем результат в adapter и отображаем элементы
+            movies?.let { loadedMovies ->
+                val moviesList = listOf(
+                    MainCardContainer(
+                        stringId,
+                        loadedMovies.map {
+                            MovieItem(it) { movie ->
+                                openMovieDetails(
+                                    movie
+                                )
+                            }
+                        }.toList()
+                    )
+                )
+                movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+            }
+        }
     }
 
     private fun openMovieDetails(movie: Movie) {
@@ -94,6 +109,9 @@ class FeedFragment : Fragment() {
         val bundle = Bundle()
         bundle.putString(MovieDetailsFragment.TITLE, movie.title)
         bundle.putFloat(MovieDetailsFragment.RATING, movie.rating)
+        bundle.putString(MovieDetailsFragment.POSTER_PATH, movie.posterPath)
+        bundle.putString(MovieDetailsFragment.OVERVIEW, movie.overview)
+        bundle.putInt(MovieDetailsFragment.ID, movie.id ?: 0)
         findNavController().navigate(R.id.movie_details_fragment, bundle, options)
     }
 

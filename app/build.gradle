@@ -18,6 +18,8 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField 'String', 'THE_MOVIE_DATABASE_API', keystoreProperties['THE_MOVIE_DATABASE_API']
+        buildConfigField 'String', 'IMAGE_URL', '"https://image.tmdb.org/t/p/w500"'
+        buildConfigField 'String', 'BASE_URL', '"https://api.themoviedb.org/3/"'
     }
     buildTypes {
         release {
@@ -67,8 +69,13 @@ dependencies {
 
 
     // Picasso
-    implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'jp.wasabeef:picasso-transformations:2.2.1'
+    implementation "com.squareup.picasso:picasso:$rootProject.picassoVersion"
+    implementation "jp.wasabeef:picasso-transformations:$rootProject.picassoTransformationsVersion"
+
+    //Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$rootProject.loggingInterceptorVersion"
 
     implementation "androidx.recyclerview:recyclerview:$rootProject.recyclerViewVersion"
     implementation 'androidx.cardview:cardview:1.0.0'
