@@ -1,6 +1,7 @@
 package ru.mikhailskiy.intensiv.data
 
 import com.google.gson.annotations.SerializedName
+import ru.mikhailskiy.intensiv.BuildConfig.IMAGE_URL
 
 data class Actor(
     @SerializedName("id")
@@ -10,5 +11,5 @@ data class Actor(
 ) {
     @SerializedName("profile_path")
     var posterPath: String? = null
-        get() = "https://image.tmdb.org/t/p/w500$field"
+        get() = IMAGE_URL.plus(field)
 }

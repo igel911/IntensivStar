@@ -49,7 +49,7 @@ class TvShowsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val getPopularTvShows =
-            MovieApiClient.apiClient.getPopularTvShows(FeedFragment.API_KEY, "ru")
+            MovieApiClient.apiClient.getPopularTvShows()
         getPopularTvShows.enqueue(object : Callback<TvShowsResponse> {
 
             override fun onFailure(call: Call<TvShowsResponse>, error: Throwable) {

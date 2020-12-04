@@ -53,13 +53,13 @@ class FeedFragment : Fragment() {
             }
         }
 
-        val getTopRatedMovies = MovieApiClient.apiClient.getTopRatedMovies(API_KEY, "ru")
+        val getTopRatedMovies = MovieApiClient.apiClient.getTopRatedMovies()
         getTopRatedMovies.enqueue(getMovieCallback(R.string.recommended))
 
-        val getUpcomingMovies = MovieApiClient.apiClient.getUpComingMovies(API_KEY, "ru")
+        val getUpcomingMovies = MovieApiClient.apiClient.getUpComingMovies()
         getUpcomingMovies.enqueue(getMovieCallback(R.string.upcoming))
 
-        val getPopularMovies = MovieApiClient.apiClient.getPopularMovies(API_KEY, "ru")
+        val getPopularMovies = MovieApiClient.apiClient.getPopularMovies()
         getPopularMovies.enqueue(getMovieCallback(R.string.popular))
 
     }

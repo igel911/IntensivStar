@@ -12,7 +12,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/image_movie"
+            android:id="@+id/movie_image"
             android:layout_width="match_parent"
             android:layout_height="@dimen/movie_image_toolbar_height"
             android:contentDescription="@string/movie_image_description"
@@ -20,7 +20,7 @@
             android:src="@drawable/aqua_man" />
 
         <ImageView
-            android:id="@+id/back_arrow_movie"
+            android:id="@+id/movie_back_arrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
@@ -30,7 +30,7 @@
             android:src="@drawable/ic_left_arrow" />
 
         <CheckBox
-            android:id="@+id/button_like_movie"
+            android:id="@+id/movie_like_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
@@ -61,7 +61,7 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
                     android:layout_marginStart="@dimen/material_margin_normal"
-                    android:layout_toStartOf="@+id/image_view_full_hd"
+                    android:layout_toStartOf="@+id/full_hd_image_view"
                     android:textColor="@color/white"
                     android:textSize="@dimen/tv_show_card_text_size"
                     android:textStyle="bold"
@@ -69,7 +69,7 @@
                     tools:textColor="@color/white" />
 
                 <ImageView
-                    android:id="@+id/image_view_full_hd"
+                    android:id="@+id/full_hd_image_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -87,7 +87,7 @@
                 android:layout_marginBottom="@dimen/material_margin_normal">
 
                 <Button
-                    android:id="@+id/button_movie_watch"
+                    android:id="@+id/watch_movie_button"
                     android:layout_width="wrap_content"
                     android:layout_height="35dp"
                     android:layout_alignParentStart="true"
@@ -114,7 +114,7 @@
             </RelativeLayout>
 
             <TextView
-                android:id="@+id/text_movie_desc"
+                android:id="@+id/overview_movie_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/material_margin_normal"
@@ -123,7 +123,7 @@
                 tools:text="a long-long description for a selected movie" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_view_actors"
+                android:id="@+id/actors_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/material_margin_normal"
@@ -141,7 +141,7 @@
                 android:layout_marginTop="@dimen/material_margin_normal">
 
                 <TextView
-                    android:id="@+id/text_view_studio_title"
+                    android:id="@+id/title_studio_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
@@ -149,49 +149,49 @@
                     android:textColor="@color/white" />
 
                 <TextView
-                    android:id="@+id/text_view_genre_title"
+                    android:id="@+id/tile_genre_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_view_studio"
+                    android:layout_below="@+id/studio_text_view"
                     android:layout_marginTop="@dimen/material_margin_small"
                     android:text="@string/genre"
                     android:textColor="@color/white" />
 
                 <TextView
-                    android:id="@+id/text_view_year_title"
+                    android:id="@+id/title_year_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_view_genre"
+                    android:layout_below="@+id/genre_text_view"
                     android:layout_marginTop="@dimen/material_margin_small"
                     android:text="@string/year"
                     android:textColor="@color/white" />
 
                 <TextView
-                    android:id="@+id/text_view_studio"
+                    android:id="@+id/studio_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/material_margin_normal"
-                    android:layout_toEndOf="@+id/text_view_studio_title"
+                    android:layout_toEndOf="@+id/title_studio_text_view"
                     android:textColor="@color/grey"
                     tools:text="Warner Bros." />
 
                 <TextView
-                    android:id="@+id/text_view_genre"
+                    android:id="@+id/genre_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_view_studio"
-                    android:layout_alignStart="@+id/text_view_studio"
-                    android:layout_alignTop="@+id/text_view_genre_title"
+                    android:layout_below="@+id/studio_text_view"
+                    android:layout_alignStart="@+id/studio_text_view"
+                    android:layout_alignTop="@+id/tile_genre_text_view"
                     android:textColor="@color/grey"
                     tools:text="Action, Adventure, Fantasy" />
 
                 <TextView
-                    android:id="@+id/text_view_year"
+                    android:id="@+id/year_text_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/text_view_genre"
-                    android:layout_alignStart="@+id/text_view_genre"
-                    android:layout_alignTop="@+id/text_view_year_title"
+                    android:layout_below="@+id/genre_text_view"
+                    android:layout_alignStart="@+id/genre_text_view"
+                    android:layout_alignTop="@+id/title_year_text_view"
                     android:textColor="@color/grey"
                     tools:text="2018" />
 

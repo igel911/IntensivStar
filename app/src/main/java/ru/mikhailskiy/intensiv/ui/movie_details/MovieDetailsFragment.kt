@@ -18,7 +18,6 @@ import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.CreditsResponse
 import ru.mikhailskiy.intensiv.data.MovieDetailResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.ui.feed.FeedFragment
 import timber.log.Timber
 
 
@@ -56,21 +55,21 @@ class MovieDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        back_arrow_movie.setOnClickListener {
+        movie_back_arrow.setOnClickListener {
             findNavController().popBackStack()
         }
 
         title_text_view.text = title
         movie_rating.rating = rating ?: 0.0f
-        text_movie_desc.text = overview
+        overview_movie_text_view.text = overview
 
 
         Picasso.get()
             .load(posterPath)
-            .into(image_movie)
+            .into(movie_image)
 
         val getMovieDetails =
-            MovieApiClient.apiClient.getMovieDetails(id ?: 0, FeedFragment.API_KEY, "ru")
+            MovieApiClient.apiClient.getMovieDetails(id ?: 0)
         getMovieDetails.enqueue(object : Callback<MovieDetailResponse> {
 
             override fun onFailure(call: Call<MovieDetailResponse>, error: Throwable) {
@@ -83,14 +82,14 @@ class MovieDetailsFragment : Fragment() {
             ) {
                 val details = detailResponse.body()
                 details?.let {
-                    text_view_studio.text = it.companyNamesString
-                    text_view_genre.text = it.genresString
-                    text_view_year.text = it.year
+                    studio_text_view.text = it.companyNamesString
+                    genre_text_view.text = it.genresString
+                    year_text_view.text = it.year
                 }
             }
         })
 
-        val getCredits = MovieApiClient.apiClient.getCredits(id ?: 0, FeedFragment.API_KEY, "ru")
+        val getCredits = MovieApiClient.apiClient.getCredits(id ?: 0)
         getCredits.enqueue(object : Callback<CreditsResponse> {
             override fun onResponse(
                 call: Call<CreditsResponse>,
@@ -102,7 +101,7 @@ class MovieDetailsFragment : Fragment() {
                         ActorItem(it)
                     }.toList()
 
-                    recycler_view_actors.adapter = adapter.apply { addAll(actorItemList) }
+                    actors_recycler_view.adapter = adapter.apply { addAll(actorItemList) }
                 }
             }
 

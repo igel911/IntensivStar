@@ -4,10 +4,10 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.network.logger.CustomHttpLogging
 
 object MovieApiClient {
-    private const val BASE_URL = "https://api.themoviedb.org/3/"
 
     private var client: OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(HttpLoggingInterceptor(CustomHttpLogging()).apply {
@@ -19,7 +19,7 @@ object MovieApiClient {
     val apiClient: MovieApiInterface by lazy {
 
         val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

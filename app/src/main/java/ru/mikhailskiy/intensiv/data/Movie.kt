@@ -1,6 +1,7 @@
 package ru.mikhailskiy.intensiv.data
 
 import com.google.gson.annotations.SerializedName
+import ru.mikhailskiy.intensiv.BuildConfig.IMAGE_URL
 
 data class Movie (
     @SerializedName("adult")
@@ -34,5 +35,5 @@ data class Movie (
 
     @SerializedName("poster_path")
     var posterPath: String? = null
-        get() = "https://image.tmdb.org/t/p/w500$field"
+        get() = IMAGE_URL.plus(field)
 }
