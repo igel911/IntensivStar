@@ -7,15 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.TvShow
 import ru.mikhailskiy.intensiv.data.TvShowsResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.ui.feed.FeedFragment
+import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
 import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
@@ -25,6 +23,7 @@ class TvShowsFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
+    private var disposable: Disposable? = null
 
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
@@ -48,33 +47,29 @@ class TvShowsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val getPopularTvShows =
-            MovieApiClient.apiClient.getPopularTvShows()
-        getPopularTvShows.enqueue(object : Callback<TvShowsResponse> {
+        val getPopularTvShows = MovieApiClient.apiClient.getPopularTvShows()
+        disposable = getPopularTvShows
+            .compose(ApiSingleTransformer<TvShowsResponse>())
+            .subscribe(
+                { response ->
+                    response.results?.let { list ->
+                        val tvShowsList = list.map {
+                            TvShowItem(it) { tvShow ->
+                                openTvShowDetails(
+                                    tvShow
+                                )
+                            }
+                        }.toList()
 
-            override fun onFailure(call: Call<TvShowsResponse>, error: Throwable) {
-                Timber.e(error.toString())
-            }
+                        tv_shows_recycler_view.adapter = adapter.apply { addAll(tvShowsList) }
+                    }
+                },
+                { Timber.e(it.toString()) })
+    }
 
-            override fun onResponse(
-                call: Call<TvShowsResponse>,
-                response: Response<TvShowsResponse>
-            ) {
-
-                val tvShows = response.body()?.results
-                tvShows?.let { loadedTvShows ->
-                    val tvShowsList = loadedTvShows.map {
-                        TvShowItem(it) { tvShow ->
-                            openTvShowDetails(
-                                tvShow
-                            )
-                        }
-                    }.toList()
-
-                    tv_shows_recycler_view.adapter = adapter.apply { addAll(tvShowsList) }
-                }
-            }
-        })
+    override fun onStop() {
+        super.onStop()
+        disposable?.dispose()
     }
 
     private fun openTvShowDetails(tvShow: TvShow) {

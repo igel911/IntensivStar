@@ -1,5 +1,6 @@
 package ru.mikhailskiy.intensiv.network
 
+import io.reactivex.Single
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -17,44 +18,44 @@ interface MovieApiInterface {
     fun getTopRatedMovies(
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
-    ): Call<MoviesResponse>
+    ): Single<MoviesResponse>
 
     @GET("movie/upcoming")
     fun getUpComingMovies(
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
-    ): Call<MoviesResponse>
+    ): Single<MoviesResponse>
 
     @GET("movie/popular")
     fun getPopularMovies(
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
-    ): Call<MoviesResponse>
+    ): Single<MoviesResponse>
 
     @GET("tv/popular")
     fun getPopularTvShows(
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
-    ): Call<TvShowsResponse>
+    ): Single<TvShowsResponse>
 
     @GET("movie/{id}")
     fun getMovieDetails(
         @Path("id") id: Int,
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
-    ): Call<MovieDetailResponse>
+    ): Single<MovieDetailResponse>
 
     @GET("movie/{id}/credits")
     fun getCredits(
         @Path("id") id: Int,
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru"
-    ): Call<CreditsResponse>
+    ): Single<CreditsResponse>
 
     @GET("search/movie")
     fun searchByQuery(
         @Query("api_key") apiKey: String = THE_MOVIE_DATABASE_API,
         @Query("language") language: String = "ru",
         @Query("query") query: String
-    ): Call<MoviesResponse>
+    ): Single<MoviesResponse>
 }

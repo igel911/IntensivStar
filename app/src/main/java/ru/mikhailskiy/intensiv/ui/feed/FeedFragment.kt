@@ -9,12 +9,12 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
@@ -22,10 +22,12 @@ import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment
+import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
 import timber.log.Timber
 
 class FeedFragment : Fragment() {
 
+    private val compositeDisposable = CompositeDisposable()
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
@@ -54,46 +56,45 @@ class FeedFragment : Fragment() {
         }
 
         val getTopRatedMovies = MovieApiClient.apiClient.getTopRatedMovies()
-        getTopRatedMovies.enqueue(getMovieCallback(R.string.recommended))
+        compositeDisposable.add(addMovieObserver(getTopRatedMovies, R.string.recommended))
 
         val getUpcomingMovies = MovieApiClient.apiClient.getUpComingMovies()
-        getUpcomingMovies.enqueue(getMovieCallback(R.string.upcoming))
+        compositeDisposable.add(addMovieObserver(getUpcomingMovies, R.string.upcoming))
 
         val getPopularMovies = MovieApiClient.apiClient.getPopularMovies()
-        getPopularMovies.enqueue(getMovieCallback(R.string.popular))
-
+        compositeDisposable.add(addMovieObserver(getPopularMovies, R.string.popular))
     }
 
-    private fun getMovieCallback(@StringRes stringId: Int) = object : Callback<MoviesResponse> {
-
-        override fun onFailure(call: Call<MoviesResponse>, error: Throwable) {
-            // Логируем ошибку
-            Timber.e(error.toString())
-        }
-
-        override fun onResponse(
-            call: Call<MoviesResponse>,
-            response: Response<MoviesResponse>
-        ) {
-
-            val movies = response.body()?.results
-            // Передаем результат в adapter и отображаем элементы
-            movies?.let { loadedMovies ->
-                val moviesList = listOf(
-                    MainCardContainer(
-                        stringId,
-                        loadedMovies.map {
-                            MovieItem(it) { movie ->
-                                openMovieDetails(
-                                    movie
-                                )
-                            }
-                        }.toList()
-                    )
-                )
-                movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
-            }
-        }
+    private fun addMovieObserver(
+        movieObservable: Single<MoviesResponse>,
+        @StringRes stringId: Int
+    ): Disposable {
+        return movieObservable
+            .compose(ApiSingleTransformer<MoviesResponse>())
+            .subscribe(
+                { response ->
+                    // Передаем результат в adapter и отображаем элементы
+                    response.results?.let { loadedMovies ->
+                        val moviesList = listOf(
+                            MainCardContainer(
+                                stringId,
+                                loadedMovies.map {
+                                    MovieItem(it) { movie ->
+                                        openMovieDetails(
+                                            movie
+                                        )
+                                    }
+                                }.toList()
+                            )
+                        )
+                        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+                    }
+                },
+                {
+                    // Логируем ошибку
+                    Timber.e(it.toString())
+                }
+            )
     }
 
     private fun openMovieDetails(movie: Movie) {
@@ -133,6 +134,7 @@ class FeedFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         search_toolbar.clear()
+        compositeDisposable.clear()
     }
 
 
