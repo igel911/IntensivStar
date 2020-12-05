@@ -9,9 +9,13 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable
+import io.reactivex.ObservableOnSubscribe
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.search_toolbar.view.*
@@ -24,6 +28,7 @@ import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment
 import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment() {
 
@@ -48,12 +53,26 @@ class FeedFragment : Fragment() {
         movies_recycler_view.layoutManager = LinearLayoutManager(context)
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
-        search_toolbar.search_edit_text.afterTextChanged {
-            Timber.d(it.toString())
-            if (it.toString().length > 3) {
-                openSearch(it.toString())
+        val searchDisposable = Observable.create(ObservableOnSubscribe<String> { emitter ->
+            search_toolbar.search_edit_text.afterTextChanged {
+                if (!emitter.isDisposed) {
+                    emitter.onNext(it.toString())
+                }
             }
-        }
+        })
+            .map { it.replace(" ", "") }
+            .filter { it.length > 3 }
+            .debounce(1, TimeUnit.SECONDS)
+            .observeOn(Schedulers.io())
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe(
+                {
+                    openSearch(it.toString())
+                },
+                { Timber.e(it.toString()) })
+
+        compositeDisposable.add(searchDisposable)
+
 
         val getTopRatedMovies = MovieApiClient.apiClient.getTopRatedMovies()
         compositeDisposable.add(addMovieObserver(getTopRatedMovies, R.string.recommended))
