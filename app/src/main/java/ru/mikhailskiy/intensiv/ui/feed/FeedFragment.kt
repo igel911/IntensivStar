@@ -9,26 +9,20 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import io.reactivex.Observable
-import io.reactivex.ObservableOnSubscribe
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.feed_fragment.*
 import kotlinx.android.synthetic.main.feed_header.*
-import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.BuildConfig
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.Movie
 import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.ui.afterTextChanged
 import ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment
-import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import ru.mikhailskiy.intensiv.utils.subscribeOnIoObserveOnMain
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 
 class FeedFragment : Fragment() {
 
@@ -53,18 +47,8 @@ class FeedFragment : Fragment() {
         movies_recycler_view.layoutManager = LinearLayoutManager(context)
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
-        val searchDisposable = Observable.create(ObservableOnSubscribe<String> { emitter ->
-            search_toolbar.search_edit_text.afterTextChanged {
-                if (!emitter.isDisposed) {
-                    emitter.onNext(it.toString())
-                }
-            }
-        })
-            .map { it.replace(" ", "") }
-            .filter { it.length > 3 }
-            .debounce(1, TimeUnit.SECONDS)
-            .observeOn(Schedulers.io())
-            .subscribeOn(AndroidSchedulers.mainThread())
+        val searchDisposable = search_toolbar.search()
+            .subscribeOnIoObserveOnMain()
             .subscribe(
                 {
                     openSearch(it.toString())
@@ -89,26 +73,26 @@ class FeedFragment : Fragment() {
         @StringRes stringId: Int
     ): Disposable {
         return movieObservable
-            .compose(ApiSingleTransformer<MoviesResponse>())
-            .subscribe(
-                { response ->
-                    // Передаем результат в adapter и отображаем элементы
-                    response.results?.let { loadedMovies ->
-                        val moviesList = listOf(
-                            MainCardContainer(
-                                stringId,
-                                loadedMovies.map {
-                                    MovieItem(it) { movie ->
-                                        openMovieDetails(
-                                            movie
-                                        )
-                                    }
-                                }.toList()
-                            )
+            .compose(SingleThreadTransformer<MoviesResponse>())
+            .map { response ->
+                // Передаем результат в adapter и отображаем элементы
+                response.results?.let { loadedMovies ->
+                    return@map listOf(
+                        MainCardContainer(
+                            stringId,
+                            loadedMovies.map {
+                                MovieItem(it) { movie ->
+                                    openMovieDetails(
+                                        movie
+                                    )
+                                }
+                            }.toList()
                         )
-                        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
-                    }
-                },
+                    )
+                } ?: emptyList()
+            }
+            .subscribe(
+                { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
                 {
                     // Логируем ошибку
                     Timber.e(it.toString())

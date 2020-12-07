@@ -14,7 +14,7 @@ import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.feed.MovieItem
-import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
 import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
@@ -52,7 +52,7 @@ class SearchFragment : Fragment() {
 
         val getSearchByQuery = MovieApiClient.apiClient.searchByQuery(query = searchTerm ?: "")
         disposable = getSearchByQuery
-            .compose(ApiSingleTransformer<MoviesResponse>())
+            .compose(SingleThreadTransformer<MoviesResponse>())
             .subscribe(
                 { response ->
                     response.results?.let { loadedMovies ->

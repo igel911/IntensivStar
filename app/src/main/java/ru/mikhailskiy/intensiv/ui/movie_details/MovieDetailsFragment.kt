@@ -15,7 +15,7 @@ import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.CreditsResponse
 import ru.mikhailskiy.intensiv.data.MovieDetailResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
 import timber.log.Timber
 
 
@@ -71,7 +71,7 @@ class MovieDetailsFragment : Fragment() {
             MovieApiClient.apiClient.getMovieDetails(id ?: 0)
         compositeDisposable.add(
             getMovieDetails
-                .compose(ApiSingleTransformer<MovieDetailResponse>())
+                .compose(SingleThreadTransformer<MovieDetailResponse>())
                 .subscribe(
                     {
                         it?.let {
@@ -86,17 +86,15 @@ class MovieDetailsFragment : Fragment() {
 
         val getCredits = MovieApiClient.apiClient.getCredits(id ?: 0)
         compositeDisposable.add(getCredits
-            .compose(ApiSingleTransformer<CreditsResponse>())
+            .compose(SingleThreadTransformer<CreditsResponse>())
+            .map { it.actors ?: emptyList() }
+            .map {
+                it.map { actor ->
+                    ActorItem(actor)
+                }.toList()
+            }
             .subscribe(
-                { response ->
-                    response.actors?.let { list ->
-                        val actorItemList = list.map {
-                            ActorItem(it)
-                        }.toList()
-
-                        actors_recycler_view.adapter = adapter.apply { addAll(actorItemList) }
-                    }
-                },
+                { actors_recycler_view.adapter = adapter.apply { addAll(it) } },
                 { Timber.e(it.toString()) }
             )
         )

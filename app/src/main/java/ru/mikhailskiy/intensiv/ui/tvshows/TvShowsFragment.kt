@@ -13,7 +13,7 @@ import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.TvShow
 import ru.mikhailskiy.intensiv.data.TvShowsResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
-import ru.mikhailskiy.intensiv.utils.ApiSingleTransformer
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
 import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
@@ -49,7 +49,7 @@ class TvShowsFragment : Fragment() {
 
         val getPopularTvShows = MovieApiClient.apiClient.getPopularTvShows()
         disposable = getPopularTvShows
-            .compose(ApiSingleTransformer<TvShowsResponse>())
+            .compose(SingleThreadTransformer<TvShowsResponse>())
             .subscribe(
                 { response ->
                     response.results?.let { list ->
