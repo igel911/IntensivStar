@@ -9,6 +9,7 @@ import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable.fromIterable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -71,34 +72,25 @@ class FeedFragment : Fragment() {
     private fun addMovieObserver(
         movieObservable: Single<MoviesResponse>,
         @StringRes stringId: Int
-    ): Disposable {
-        return movieObservable
-            .compose(SingleThreadTransformer<MoviesResponse>())
-            .map { response ->
-                // Передаем результат в adapter и отображаем элементы
-                response.results?.let { loadedMovies ->
-                    return@map listOf(
-                        MainCardContainer(
-                            stringId,
-                            loadedMovies.map {
-                                MovieItem(it) { movie ->
-                                    openMovieDetails(
-                                        movie
-                                    )
-                                }
-                            }.toList()
-                        )
-                    )
-                } ?: emptyList()
+    ): Disposable = movieObservable
+        .compose(SingleThreadTransformer<MoviesResponse>())
+        .map { it.results ?: emptyList() }
+        .flatMapObservable { fromIterable(it) }
+        .map {
+            MovieItem(it) { movie ->
+                openMovieDetails(
+                    movie
+                )
             }
-            .subscribe(
-                { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
-                {
-                    // Логируем ошибку
-                    Timber.e(it.toString())
-                }
-            )
-    }
+        }
+        .toList()
+        .map { MainCardContainer(stringId, it) }
+        .map { listOf(it) }
+        .subscribe(
+            { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
+            { Timber.e(it.toString()) }
+        )
+
 
     private fun openMovieDetails(movie: Movie) {
         val options = navOptions {

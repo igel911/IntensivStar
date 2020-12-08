@@ -71,6 +71,11 @@ class SearchBar @JvmOverloads constructor(
             }
         })
             .map { it.trim() }
-            .filter { it.length > 3 }
-            .debounce(500, TimeUnit.MILLISECONDS)
+            .filter { it.length > MIN_LENGTH }
+            .debounce(DURATION, TimeUnit.MILLISECONDS)
+
+    companion object {
+        const val MIN_LENGTH = 3
+        const val DURATION = 500L
+    }
 }

@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable.fromIterable
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.movie_details_fragment.*
 import ru.mikhailskiy.intensiv.R
@@ -88,17 +89,14 @@ class MovieDetailsFragment : Fragment() {
         compositeDisposable.add(getCredits
             .compose(SingleThreadTransformer<CreditsResponse>())
             .map { it.actors ?: emptyList() }
-            .map {
-                it.map { actor ->
-                    ActorItem(actor)
-                }.toList()
-            }
+            .flatMapObservable { fromIterable(it) }
+            .map { ActorItem(it) }
+            .toList()
             .subscribe(
                 { actors_recycler_view.adapter = adapter.apply { addAll(it) } },
                 { Timber.e(it.toString()) }
             )
         )
-
     }
 
     override fun onStop() {
