@@ -7,8 +7,11 @@ import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
+import io.reactivex.Observable
+import io.reactivex.ObservableOnSubscribe
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.R
+import java.util.concurrent.TimeUnit
 
 class SearchBar @JvmOverloads constructor(
     context: Context,
@@ -58,5 +61,21 @@ class SearchBar @JvmOverloads constructor(
                 delete_text_button.visibility = View.GONE
             }
         }
+    }
+
+    fun search(): Observable<String> = Observable.create(ObservableOnSubscribe<String> { emitter ->
+            search_edit_text.afterTextChanged {
+                if (!emitter.isDisposed) {
+                    emitter.onNext(it.toString())
+                }
+            }
+        })
+            .map { it.trim() }
+            .filter { it.length > MIN_LENGTH }
+            .debounce(DURATION, TimeUnit.MILLISECONDS)
+
+    companion object {
+        const val MIN_LENGTH = 3
+        const val DURATION = 500L
     }
 }

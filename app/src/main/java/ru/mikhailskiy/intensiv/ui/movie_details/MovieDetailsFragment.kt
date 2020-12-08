@@ -9,15 +9,14 @@ import androidx.navigation.fragment.findNavController
 import com.squareup.picasso.Picasso
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable.fromIterable
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.movie_details_fragment.*
-import kotlinx.android.synthetic.main.movie_details_fragment.movie_rating
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.CreditsResponse
 import ru.mikhailskiy.intensiv.data.MovieDetailResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
 import timber.log.Timber
 
 
@@ -28,6 +27,7 @@ class MovieDetailsFragment : Fragment() {
     private var posterPath: String? = null
     private var overview: String? = null
     private var id: Int? = null
+    private val compositeDisposable = CompositeDisposable()
 
     private val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
@@ -70,46 +70,38 @@ class MovieDetailsFragment : Fragment() {
 
         val getMovieDetails =
             MovieApiClient.apiClient.getMovieDetails(id ?: 0)
-        getMovieDetails.enqueue(object : Callback<MovieDetailResponse> {
-
-            override fun onFailure(call: Call<MovieDetailResponse>, error: Throwable) {
-                Timber.e(error.toString())
-            }
-
-            override fun onResponse(
-                call: Call<MovieDetailResponse>,
-                detailResponse: Response<MovieDetailResponse>
-            ) {
-                val details = detailResponse.body()
-                details?.let {
-                    studio_text_view.text = it.companyNamesString
-                    genre_text_view.text = it.genresString
-                    year_text_view.text = it.year
-                }
-            }
-        })
+        compositeDisposable.add(
+            getMovieDetails
+                .compose(SingleThreadTransformer<MovieDetailResponse>())
+                .subscribe(
+                    {
+                        it?.let {
+                            studio_text_view.text = it.companyNamesString
+                            genre_text_view.text = it.genresString
+                            year_text_view.text = it.year
+                        }
+                    },
+                    { Timber.e(it.toString()) }
+                )
+        )
 
         val getCredits = MovieApiClient.apiClient.getCredits(id ?: 0)
-        getCredits.enqueue(object : Callback<CreditsResponse> {
-            override fun onResponse(
-                call: Call<CreditsResponse>,
-                response: Response<CreditsResponse>
-            ) {
-                val actors = response.body()?.actors
-                actors?.let { list ->
-                    val actorItemList = list.map {
-                        ActorItem(it)
-                    }.toList()
+        compositeDisposable.add(getCredits
+            .compose(SingleThreadTransformer<CreditsResponse>())
+            .map { it.actors ?: emptyList() }
+            .flatMapObservable { fromIterable(it) }
+            .map { ActorItem(it) }
+            .toList()
+            .subscribe(
+                { actors_recycler_view.adapter = adapter.apply { addAll(it) } },
+                { Timber.e(it.toString()) }
+            )
+        )
+    }
 
-                    actors_recycler_view.adapter = adapter.apply { addAll(actorItemList) }
-                }
-            }
-
-            override fun onFailure(call: Call<CreditsResponse>, error: Throwable) {
-                Timber.e(error.toString())
-            }
-
-        })
+    override fun onStop() {
+        super.onStop()
+        compositeDisposable.clear()
     }
 
     companion object {
