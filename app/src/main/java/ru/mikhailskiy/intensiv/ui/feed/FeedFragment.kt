@@ -60,20 +60,21 @@ class FeedFragment : Fragment() {
 
 
         val getTopRatedMovies = MovieApiClient.apiClient.getTopRatedMovies()
-        compositeDisposable.add(addMovieObserver(getTopRatedMovies, R.string.recommended))
+        val topRatedMovies = createMoviesWithTitleSingle(getTopRatedMovies, R.string.recommended)
 
         val getUpcomingMovies = MovieApiClient.apiClient.getUpComingMovies()
-        compositeDisposable.add(addMovieObserver(getUpcomingMovies, R.string.upcoming))
+        val upcomingMovies = createMoviesWithTitleSingle(getUpcomingMovies, R.string.upcoming)
 
         val getPopularMovies = MovieApiClient.apiClient.getPopularMovies()
-        compositeDisposable.add(addMovieObserver(getPopularMovies, R.string.popular))
+        val popularMovies = createMoviesWithTitleSingle(getPopularMovies, R.string.popular)
+
+        addMovieZipObserver(topRatedMovies, upcomingMovies, popularMovies)
     }
 
-    private fun addMovieObserver(
-        movieObservable: Single<MoviesResponse>,
+    private fun createMoviesWithTitleSingle(
+        movieSingle: Single<MoviesResponse>,
         @StringRes stringId: Int
-    ): Disposable = movieObservable
-        .compose(SingleThreadTransformer<MoviesResponse>())
+    ): Single<MainCardContainer> = movieSingle
         .map { it.results ?: emptyList() }
         .flatMapObservable { fromIterable(it) }
         .map {
@@ -85,11 +86,24 @@ class FeedFragment : Fragment() {
         }
         .toList()
         .map { MainCardContainer(stringId, it) }
-        .map { listOf(it) }
-        .subscribe(
-            { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
-            { Timber.e(it.toString()) }
-        )
+
+    private fun addMovieZipObserver(
+        topRatedMovies: Single<MainCardContainer>,
+        upcomingMovies: Single<MainCardContainer>,
+        popularMovies: Single<MainCardContainer>
+    ): Disposable {
+        return Single
+            .zip(
+                topRatedMovies,
+                upcomingMovies,
+                popularMovies,
+                { topRated, upcoming, popular -> listOf(topRated, upcoming, popular) })
+            .compose(SingleThreadTransformer<List<MainCardContainer>>())
+            .subscribe(
+                { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
+                { Timber.e(it.toString()) }
+            )
+    }
 
 
     private fun openMovieDetails(movie: Movie) {
