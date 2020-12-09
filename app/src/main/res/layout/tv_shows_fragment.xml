@@ -16,4 +16,8 @@
         tools:itemCount="3"
         tools:listitem="@layout/item_tv_shows" />
 
+    <include
+        android:id="@+id/tv_shows_progress_bar"
+        layout="@layout/progress_bar" />
+
 </FrameLayout>

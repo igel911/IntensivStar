@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.feed_header.*
 import kotlinx.android.synthetic.main.fragment_search.*
@@ -15,6 +16,7 @@ import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.feed.MovieItem
 import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import ru.mikhailskiy.intensiv.utils.showProgressBarOnLoad
 import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
@@ -53,19 +55,16 @@ class SearchFragment : Fragment() {
         val getSearchByQuery = MovieApiClient.apiClient.searchByQuery(query = searchTerm ?: "")
         disposable = getSearchByQuery
             .compose(SingleThreadTransformer<MoviesResponse>())
+            .map { it.results ?: emptyList() }
+            .flatMapObservable { Observable.fromIterable(it) }
+            .map {
+                MovieItem(it) { }
+            }
+            .toList()
+            .showProgressBarOnLoad(search_progress_bar, search_recycler_view)
             .subscribe(
-                { response ->
-                    response.results?.let { loadedMovies ->
-                        val moviesList = loadedMovies.map {
-                            MovieItem(it) { }
-                        }.toList()
-
-                        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
-                    }
-                },
+                { search_recycler_view.adapter = adapter.apply { addAll(it) } },
                 { Timber.e(it.toString()) })
-
-
     }
 
     override fun onStop() {

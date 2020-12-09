@@ -8,7 +8,8 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import io.reactivex.Observable
-import io.reactivex.ObservableOnSubscribe
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.R
 import java.util.concurrent.TimeUnit
@@ -63,16 +64,14 @@ class SearchBar @JvmOverloads constructor(
         }
     }
 
-    fun search(): Observable<String> = Observable.create(ObservableOnSubscribe<String> { emitter ->
-            search_edit_text.afterTextChanged {
-                if (!emitter.isDisposed) {
-                    emitter.onNext(it.toString())
-                }
-            }
-        })
+    fun search(): Observable<String> {
+        val subject : Subject<String> = PublishSubject.create()
+        search_edit_text.afterTextChanged { subject.onNext(it.toString()) }
+        return subject
             .map { it.trim() }
             .filter { it.length > MIN_LENGTH }
             .debounce(DURATION, TimeUnit.MILLISECONDS)
+    }
 
     companion object {
         const val MIN_LENGTH = 3

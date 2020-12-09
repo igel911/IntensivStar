@@ -17,6 +17,7 @@ import ru.mikhailskiy.intensiv.data.CreditsResponse
 import ru.mikhailskiy.intensiv.data.MovieDetailResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import ru.mikhailskiy.intensiv.utils.showProgressBarOnLoad
 import timber.log.Timber
 
 
@@ -73,6 +74,7 @@ class MovieDetailsFragment : Fragment() {
         compositeDisposable.add(
             getMovieDetails
                 .compose(SingleThreadTransformer<MovieDetailResponse>())
+                .showProgressBarOnLoad(details_progress_bar, studio_text_view)
                 .subscribe(
                     {
                         it?.let {
@@ -92,6 +94,7 @@ class MovieDetailsFragment : Fragment() {
             .flatMapObservable { fromIterable(it) }
             .map { ActorItem(it) }
             .toList()
+            .showProgressBarOnLoad(actors_progress_bar, actors_recycler_view)
             .subscribe(
                 { actors_recycler_view.adapter = adapter.apply { addAll(it) } },
                 { Timber.e(it.toString()) }

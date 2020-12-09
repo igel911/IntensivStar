@@ -122,17 +122,27 @@
                 android:textColor="@color/grey"
                 tools:text="a long-long description for a selected movie" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/actors_recycler_view"
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/material_margin_normal"
-                android:layout_marginTop="@dimen/material_margin_normal"
-                android:layout_marginEnd="@dimen/material_margin_normal"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:itemCount="4"
-                tools:listitem="@layout/item_actor" />
+                android:layout_height="wrap_content">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/actors_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/material_margin_normal"
+                    android:layout_marginTop="@dimen/material_margin_normal"
+                    android:layout_marginEnd="@dimen/material_margin_normal"
+                    android:orientation="horizontal"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="4"
+                    tools:listitem="@layout/item_actor" />
+
+                <include
+                    android:id="@+id/actors_progress_bar"
+                    layout="@layout/progress_bar_relative" />
+
+            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -194,6 +204,10 @@
                     android:layout_alignTop="@+id/title_year_text_view"
                     android:textColor="@color/grey"
                     tools:text="2018" />
+
+                <include
+                    android:id="@+id/details_progress_bar"
+                    layout="@layout/progress_bar_relative" />
 
             </RelativeLayout>
 

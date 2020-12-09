@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
+import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import kotlinx.android.synthetic.main.tv_shows_fragment.*
 import ru.mikhailskiy.intensiv.R
@@ -14,6 +15,7 @@ import ru.mikhailskiy.intensiv.data.TvShow
 import ru.mikhailskiy.intensiv.data.TvShowsResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import ru.mikhailskiy.intensiv.utils.showProgressBarOnLoad
 import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
@@ -50,21 +52,21 @@ class TvShowsFragment : Fragment() {
         val getPopularTvShows = MovieApiClient.apiClient.getPopularTvShows()
         disposable = getPopularTvShows
             .compose(SingleThreadTransformer<TvShowsResponse>())
+            .map { it.results ?: emptyList() }
+            .flatMapObservable { Observable.fromIterable(it) }
+            .map {
+                TvShowItem(it) { tvShow ->
+                    openTvShowDetails(
+                        tvShow
+                    )
+                }
+            }
+            .toList()
+            .showProgressBarOnLoad(tv_shows_progress_bar, tv_shows_recycler_view)
             .subscribe(
-                { response ->
-                    response.results?.let { list ->
-                        val tvShowsList = list.map {
-                            TvShowItem(it) { tvShow ->
-                                openTvShowDetails(
-                                    tvShow
-                                )
-                            }
-                        }.toList()
-
-                        tv_shows_recycler_view.adapter = adapter.apply { addAll(tvShowsList) }
-                    }
-                },
-                { Timber.e(it.toString()) })
+                { tv_shows_recycler_view.adapter = adapter.apply { addAll(it) } },
+                { Timber.e(it.toString()) }
+            )
     }
 
     override fun onStop() {
