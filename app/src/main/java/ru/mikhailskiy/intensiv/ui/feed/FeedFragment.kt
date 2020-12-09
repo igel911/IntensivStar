@@ -22,6 +22,7 @@ import ru.mikhailskiy.intensiv.data.MoviesResponse
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment
 import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import ru.mikhailskiy.intensiv.utils.showProgressBarOnLoad
 import ru.mikhailskiy.intensiv.utils.subscribeOnIoObserveOnMain
 import timber.log.Timber
 
@@ -99,6 +100,7 @@ class FeedFragment : Fragment() {
                 popularMovies,
                 { topRated, upcoming, popular -> listOf(topRated, upcoming, popular) })
             .compose(SingleThreadTransformer<List<MainCardContainer>>())
+            .showProgressBarOnLoad(movies_progress_bar, movies_recycler_view)
             .subscribe(
                 { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
                 { Timber.e(it.toString()) }

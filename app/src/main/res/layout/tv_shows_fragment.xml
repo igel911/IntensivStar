@@ -16,4 +16,10 @@
         tools:itemCount="3"
         tools:listitem="@layout/item_tv_shows" />
 
+    <ProgressBar
+        android:id="@+id/tv_shows_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
 </FrameLayout>
