@@ -8,7 +8,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.core.view.isVisible
 import io.reactivex.Observable
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
 import kotlinx.android.synthetic.main.search_toolbar.view.*
 import ru.mikhailskiy.intensiv.R
@@ -65,7 +65,7 @@ class SearchBar @JvmOverloads constructor(
     }
 
     fun search(): Observable<String> {
-        val subject : Subject<String> = BehaviorSubject.create()
+        val subject : Subject<String> = PublishSubject.create()
         search_edit_text.afterTextChanged { subject.onNext(it.toString()) }
         return subject
             .map { it.trim() }

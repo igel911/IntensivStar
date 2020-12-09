@@ -138,11 +138,9 @@
                     tools:itemCount="4"
                     tools:listitem="@layout/item_actor" />
 
-                <ProgressBar
+                <include
                     android:id="@+id/actors_progress_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                    layout="@layout/progress_bar_relative" />
 
             </RelativeLayout>
 
@@ -207,11 +205,9 @@
                     android:textColor="@color/grey"
                     tools:text="2018" />
 
-                <ProgressBar
+                <include
                     android:id="@+id/details_progress_bar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"/>
+                    layout="@layout/progress_bar_relative" />
 
             </RelativeLayout>
 
