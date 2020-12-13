@@ -2,7 +2,6 @@ package ru.mikhailskiy.intensiv.database
 
 import androidx.room.*
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.Single
 import ru.mikhailskiy.intensiv.data.MovieEntity
 
@@ -10,7 +9,10 @@ import ru.mikhailskiy.intensiv.data.MovieEntity
 interface MovieStore {
 
     @Query("SELECT * FROM movies")
-    fun getAll(): Observable<List<MovieEntity>>
+    fun getAll(): Single<List<MovieEntity>>
+
+    @Query("SELECT COUNT (*) FROM movies ")
+    fun getRowCount() : Single<Int>
 
     @Query("SELECT * FROM movies WHERE id=:id")
     fun getById(id: Int): Single<MovieEntity>

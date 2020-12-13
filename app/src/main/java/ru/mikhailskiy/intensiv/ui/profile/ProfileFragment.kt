@@ -9,11 +9,15 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import jp.wasabeef.picasso.transformations.CropCircleTransformation
 import kotlinx.android.synthetic.main.fragment_profile.*
 import ru.mikhailskiy.intensiv.R
+import ru.mikhailskiy.intensiv.database.MovieDatabase
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import timber.log.Timber
 
 class ProfileFragment : Fragment() {
 
@@ -58,16 +62,33 @@ class ProfileFragment : Fragment() {
 
         TabLayoutMediator(tabLayout, doppelgangerViewPager) { tab, position ->
 
-            // Выделение первой части заголовка таба
-            // Название таба
             val title = profileTabLayoutTitles[position]
             // Раздеряем название на части. Первый элемент будет кол-во
             val parts = profileTabLayoutTitles[position].split(" ")
-            val number = parts[0]
-            val spannableStringTitle = SpannableString(title)
-            spannableStringTitle.setSpan(RelativeSizeSpan(2f), 0, number.count(), 0)
 
-            tab.text = spannableStringTitle
+            if (position == 0) {
+                val movieStore = MovieDatabase.getDatabase(requireContext()).movies()
+                movieStore.getRowCount()
+                    .map { it.toString() + "\n" }
+                    .compose(SingleThreadTransformer<String>())
+                    .subscribe(
+                        { setSpan(it, it + parts[1], tab) },
+                        { Timber.e(it.toString()) }
+                    )
+            } else {
+                setSpan(parts[0], title, tab)
+            }
         }.attach()
+    }
+
+    private fun setSpan(
+        number: String,
+        title: String,
+        tab: TabLayout.Tab
+    ) {
+        val spannableStringTitle = SpannableString(title)
+        spannableStringTitle.setSpan(RelativeSizeSpan(2f), 0, number.count(), 0)
+
+        tab.text = spannableStringTitle
     }
 }

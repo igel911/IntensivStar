@@ -1,16 +1,20 @@
 package ru.mikhailskiy.intensiv.ui.watchlist
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.kotlinandroidextensions.GroupieViewHolder
-import kotlinx.android.synthetic.main.fragment_watchlist.movies_recycler_view
+import io.reactivex.Observable
+import io.reactivex.disposables.Disposable
+import kotlinx.android.synthetic.main.fragment_watchlist.*
 import ru.mikhailskiy.intensiv.R
-import ru.mikhailskiy.intensiv.data.MockRepository
+import ru.mikhailskiy.intensiv.database.MovieDatabase
+import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
+import timber.log.Timber
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
@@ -20,6 +24,7 @@ class WatchlistFragment : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
 
+    var disposable: Disposable? = null
     val adapter by lazy {
         GroupAdapter<GroupieViewHolder>()
     }
@@ -46,14 +51,26 @@ class WatchlistFragment : Fragment() {
         movies_recycler_view.layoutManager = GridLayoutManager(context, 4)
         movies_recycler_view.adapter = adapter.apply { addAll(listOf()) }
 
-        val moviesList =
-            MockRepository.getMovies().map {
+        val movieStore = MovieDatabase.getDatabase(requireContext()).movies()
+
+        disposable = movieStore.getAll()
+            .flatMapObservable { Observable.fromIterable(it) }
+            .map {
                 MoviePreviewItem(
                     it
                 ) { movie -> }
-            }.toList()
+            }
+            .toList()
+            .compose(SingleThreadTransformer())
+            .subscribe(
+                { movies_recycler_view.adapter = adapter.apply { addAll(it) } },
+                { Timber.e(it.toString()) }
+            )
+    }
 
-        movies_recycler_view.adapter = adapter.apply { addAll(moviesList) }
+    override fun onStop() {
+        super.onStop()
+        disposable?.dispose()
     }
 
     companion object {
