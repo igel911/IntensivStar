@@ -107,7 +107,7 @@ class MovieDetailsFragment : Fragment() {
         val movieStore = MovieDatabase.getDatabase(requireContext()).movies()
 
         movie_like_button.setOnCheckedChangeListener { compoundButton, isChecked ->
-            val movieEntity = MovieEntity(id!!, overview!!, posterPath!!, title!!, rating!!)
+            val movieEntity = MovieEntity(id ?: 0, overview ?: "", posterPath ?: "", title ?: "", rating ?: 0.0F)
 
             if (isChecked) {
                 movieStore.insert(movieEntity)
