@@ -53,4 +53,5 @@ ext {
     picassoTransformationsVersion ='2.2.1'
     rxAndroidVersion ='2.1.1'
     rxJavaVersion='2.2.9'
+    roomVersion='2.2.5'
 }

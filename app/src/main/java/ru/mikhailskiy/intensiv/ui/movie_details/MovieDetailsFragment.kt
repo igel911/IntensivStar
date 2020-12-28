@@ -15,9 +15,12 @@ import kotlinx.android.synthetic.main.movie_details_fragment.*
 import ru.mikhailskiy.intensiv.R
 import ru.mikhailskiy.intensiv.data.CreditsResponse
 import ru.mikhailskiy.intensiv.data.MovieDetailResponse
+import ru.mikhailskiy.intensiv.data.MovieEntity
+import ru.mikhailskiy.intensiv.database.MovieDatabase
 import ru.mikhailskiy.intensiv.network.MovieApiClient
 import ru.mikhailskiy.intensiv.utils.SingleThreadTransformer
 import ru.mikhailskiy.intensiv.utils.showProgressBarOnLoad
+import ru.mikhailskiy.intensiv.utils.subscribeOnIoObserveOnMain
 import timber.log.Timber
 
 
@@ -100,6 +103,34 @@ class MovieDetailsFragment : Fragment() {
                 { Timber.e(it.toString()) }
             )
         )
+
+        val movieStore = MovieDatabase.getDatabase(requireContext()).movies()
+
+        movie_like_button.setOnCheckedChangeListener { compoundButton, isChecked ->
+            val movieEntity =
+                MovieEntity(id ?: 0, overview ?: "", posterPath ?: "", title ?: "", rating ?: 0.0F)
+
+            if (isChecked) {
+                if (id != null && id != 0) {
+                    movieStore.insert(movieEntity)
+                        .subscribeOnIoObserveOnMain()
+                        .subscribe()
+                }
+            } else {
+                movieStore.delete(movieEntity)
+                    .subscribeOnIoObserveOnMain()
+                    .subscribe()
+            }
+        }
+
+        compositeDisposable.add(movieStore.getById(id ?: 0)
+            .compose(SingleThreadTransformer())
+            .subscribe(
+                {
+                    movie_like_button.isChecked = true
+                },
+                { Timber.e(it.toString()) }
+            ))
     }
 
     override fun onStop() {
