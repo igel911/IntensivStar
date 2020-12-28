@@ -107,12 +107,15 @@ class MovieDetailsFragment : Fragment() {
         val movieStore = MovieDatabase.getDatabase(requireContext()).movies()
 
         movie_like_button.setOnCheckedChangeListener { compoundButton, isChecked ->
-            val movieEntity = MovieEntity(id ?: 0, overview ?: "", posterPath ?: "", title ?: "", rating ?: 0.0F)
+            val movieEntity =
+                MovieEntity(id ?: 0, overview ?: "", posterPath ?: "", title ?: "", rating ?: 0.0F)
 
             if (isChecked) {
-                movieStore.insert(movieEntity)
-                    .subscribeOnIoObserveOnMain()
-                    .subscribe()
+                if (id != null && id != 0) {
+                    movieStore.insert(movieEntity)
+                        .subscribeOnIoObserveOnMain()
+                        .subscribe()
+                }
             } else {
                 movieStore.delete(movieEntity)
                     .subscribeOnIoObserveOnMain()

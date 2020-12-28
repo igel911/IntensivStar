@@ -12,7 +12,7 @@ abstract class MovieDatabase : RoomDatabase() {
     abstract fun movies(): MovieStore
 
     companion object {
-        private const val DB_NAME = "DB_NAME"
+        private const val DB_NAME = "DB_MOVIE"
 
         fun getDatabase(context: Context) = Room.databaseBuilder(
             context,
