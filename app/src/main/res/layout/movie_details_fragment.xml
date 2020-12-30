@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/blueDark"
     android:orientation="vertical"
-    tools:context="ru.mikhailskiy.intensiv.ui.movie_details.MovieDetailsFragment">
+    tools:context=".presentation.ui.movie_details.MovieDetailsFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"

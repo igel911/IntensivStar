@@ -3,7 +3,7 @@ package ru.mikhailskiy.intensiv.database
 import androidx.room.*
 import io.reactivex.Completable
 import io.reactivex.Single
-import ru.mikhailskiy.intensiv.data.MovieEntity
+import ru.mikhailskiy.intensiv.database.models.MovieEntity
 
 @Dao
 interface MovieStore {
