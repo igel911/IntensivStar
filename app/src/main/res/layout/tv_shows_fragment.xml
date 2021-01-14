@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/mainFeedBackground"
-    tools:context="ru.mikhailskiy.intensiv.ui.tvshows.TvShowsFragment">
+    tools:context=".presentation.ui.tvshows.TvShowsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tv_shows_recycler_view"
